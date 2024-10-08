@@ -1,3 +1,4 @@
+import { Navbar } from '@/components/navbar';
 import { NextUIProvider } from '@nextui-org/react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
@@ -28,9 +29,12 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
     <html lang='en'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen dark`}
       >
-        <NextUIProvider>{children}</NextUIProvider>
+        <NextUIProvider>
+          <Navbar />
+          <main>{children}</main>
+        </NextUIProvider>
       </body>
     </html>
   );
