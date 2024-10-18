@@ -4,16 +4,21 @@ import { subtitle, title } from '@/components/primitives';
 import { Search } from '@geist-ui/icons';
 import { Button, Input, Tooltip } from '@nextui-org/react';
 import { useState } from 'react';
+import { searchAction } from './actions/search-action';
 
 const Home: React.FC = () => {
-  const [identification, setIdentification] = useState('');
+  const [fullName, setFullName] = useState('');
 
-  const handleSearch = (): void => {
-    alert(`Search: ${identification}`);
+  const handleSearch = async (formData: FormData): Promise<void> => {
+    const identification = formData.get('identification');
+    if (!identification || typeof identification !== 'string') return;
+
+    const data = await searchAction(identification);
+    setFullName(data.fullName);
   };
 
   return (
-    <section className='flex flex-col items-center justify-center gap-12 py-8 md:py-10'>
+    <section className='flex flex-col items-center justify-center gap-12 py-8 md:py-10 p-4'>
       <div className='flex flex-col max-w-lg text-center justify-center gap-1'>
         <h1 className={title()}>
           Busca información por
@@ -21,24 +26,28 @@ const Home: React.FC = () => {
           <span className={title({ color: 'yellow' })}>Número de Cédula</span>
         </h1>
 
-        <div className={subtitle()}>Vehiculos, Facturas, etc</div>
+        <div className={subtitle()}>
+          Prximamente información de vehiculos, facturas, etc
+        </div>
       </div>
 
-      <div className='flex flex-col gap-4 max-w-screen-sm w-full sm:flex-row'>
+      <form action={handleSearch} className='flex gap-4 max-w-screen-sm w-full'>
         <Input
           size='lg'
           type='search'
           aria-label='Search'
           placeholder='Número de cédula'
-          value={identification}
-          onChange={(e) => setIdentification(e.target.value)}
+          name='identification'
         />
 
         <Tooltip content='Buscar'>
-          <Button size='lg' isIconOnly onClick={handleSearch}>
+          <Button size='lg' isIconOnly type='submit'>
             <Search className='text-base text-default-400 pointer-events-none ' />
           </Button>
         </Tooltip>
+      </form>
+      <div>
+        <p>{fullName}</p>
       </div>
     </section>
   );
