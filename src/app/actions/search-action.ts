@@ -1,5 +1,7 @@
 'use server';
 
+import axios from 'axios';
+
 export type SearchActionResponse = {
   contribuyente: {
     nombreComercial: string;
@@ -13,12 +15,11 @@ export type SearchActionResponseAdapted = {
 export const searchAction = async (
   identification: string
 ): Promise<SearchActionResponseAdapted> => {
-  console.log(identification);
-  const response = await fetch(
+  const response = await axios.get<SearchActionResponse>(
     `https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion/${identification}`
   );
 
-  const data: SearchActionResponse = await response.json();
+  const data = response.data;
 
   return {
     fullName: data.contribuyente.nombreComercial

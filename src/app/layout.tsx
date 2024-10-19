@@ -2,6 +2,7 @@ import { Navbar } from '@/components/navbar';
 import { NextUIProvider } from '@nextui-org/react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { Toaster } from 'sonner';
 import './globals.css';
 
 const geistSans = localFont({
@@ -34,6 +35,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
         <NextUIProvider>
           <Navbar />
           <main>{children}</main>
+          <Toaster />
         </NextUIProvider>
       </body>
     </html>
