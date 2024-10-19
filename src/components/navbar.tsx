@@ -5,7 +5,7 @@ import {
   Navbar as NextUINavbar
 } from '@nextui-org/navbar';
 
-import { Github, Home } from '@geist-ui/icons';
+import { Github } from '@geist-ui/icons';
 
 export const Navbar: React.FC = () => {
   return (
@@ -17,8 +17,9 @@ export const Navbar: React.FC = () => {
             color='foreground'
             href='/'
           >
-            <Home />
-            <p className='font-bold text-inherit'>Logo</p>
+            <p className='text-2xl font-bold text-inherit flex items-center gap-2'>
+              Ecudata <span className='text-4xl'>🇪🇨</span>
+            </p>
           </Link>
         </NavbarBrand>
       </NavbarContent>

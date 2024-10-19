@@ -1,20 +1,26 @@
 'use client';
 
 import { subtitle, title } from '@/components/primitives';
-import { Search } from '@geist-ui/icons';
-import { Button, Input, Tooltip } from '@nextui-org/react';
+import { SearchButton } from '@/components/search-button';
+import { Input, Tooltip } from '@nextui-org/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { searchAction } from './actions/search-action';
 
 const Home: React.FC = () => {
   const [fullName, setFullName] = useState('');
 
   const handleSearch = async (formData: FormData): Promise<void> => {
-    const identification = formData.get('identification');
-    if (!identification || typeof identification !== 'string') return;
-
-    const data = await searchAction(identification);
-    setFullName(data.fullName);
+    try {
+      const identification = formData.get('identification');
+      if (!identification || typeof identification !== 'string') return;
+      const data = await searchAction(identification);
+      setFullName(data.fullName);
+    } catch {
+      toast.error(
+        `Número de cedula incorrecto o error al buscar la información`
+      );
+    }
   };
 
   return (
@@ -27,7 +33,7 @@ const Home: React.FC = () => {
         </h1>
 
         <div className={subtitle()}>
-          Prximamente información de vehiculos, facturas, etc
+          Próximamente información de vehiculos, facturas, etc
         </div>
       </div>
 
@@ -41,11 +47,10 @@ const Home: React.FC = () => {
         />
 
         <Tooltip content='Buscar'>
-          <Button size='lg' isIconOnly type='submit'>
-            <Search className='text-base text-default-400 pointer-events-none ' />
-          </Button>
+          <SearchButton />
         </Tooltip>
       </form>
+
       <div>
         <p>{fullName}</p>
       </div>
