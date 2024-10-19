@@ -33,7 +33,7 @@ const Home: React.FC = () => {
         </h1>
 
         <div className={subtitle()}>
-          Prximamente información de vehiculos, facturas, etc
+          Próximamente información de vehiculos, facturas, etc
         </div>
       </div>
 

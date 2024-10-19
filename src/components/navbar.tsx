@@ -18,7 +18,7 @@ export const Navbar: React.FC = () => {
             href='/'
           >
             <Home />
-            <p className='font-bold text-inherit'>Logo</p>
+            <p className='font-bold text-inherit'>Ecuador data</p>
           </Link>
         </NavbarBrand>
       </NavbarContent>
