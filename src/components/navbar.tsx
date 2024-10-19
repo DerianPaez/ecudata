@@ -5,7 +5,9 @@ import {
   Navbar as NextUINavbar
 } from '@nextui-org/navbar';
 
+import Logo from '@/app/logo.svg';
 import { Github } from '@geist-ui/icons';
+import Image from 'next/image';
 
 export const Navbar: React.FC = () => {
   return (
@@ -18,7 +20,8 @@ export const Navbar: React.FC = () => {
             href='/'
           >
             <p className='text-2xl font-bold text-inherit flex items-center gap-2'>
-              Ecudata <span className='text-4xl'>🇪🇨</span>
+              Ecudata
+              <Image src={Logo} alt='Logo Ecudata' />
             </p>
           </Link>
         </NavbarBrand>

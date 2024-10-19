@@ -34,6 +34,24 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
     <html lang='es'>
       <head>
         <link rel='canonical' href='https://ecuadordata.com/' />
+        <link rel='icon' href='./logo.svg' />
+        <link
+          rel='apple-touch-icon'
+          sizes='180x180'
+          href='./assets/apple-touch-icon.png'
+        />
+        <link
+          rel='icon'
+          type='image/png'
+          sizes='32x32'
+          href='./assets/favicon-32x32.png'
+        />
+        <link
+          rel='icon'
+          type='image/png'
+          sizes='16x16'
+          href='./assets/favicon-16x16.png'
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen dark`}
