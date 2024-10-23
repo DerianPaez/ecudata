@@ -15,6 +15,7 @@ const Home: React.FC = () => {
       const identification = formData.get('identification');
       if (!identification || typeof identification !== 'string') return;
       const data = await searchAction(identification);
+      console.log(data);
       setFullName(data.fullName);
     } catch {
       toast.error(
