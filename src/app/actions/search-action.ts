@@ -1,5 +1,6 @@
 'use server';
 
+import { Complaint, Subject, SubjectState } from '@/types/complaint';
 import axios from 'axios';
 import puppeteer from 'puppeteer';
 
@@ -13,33 +14,6 @@ export type SearchActionResponseAdapted = {
   fullName: string;
   complaints: Complaint[];
 };
-
-type Complaint = {
-  id: string; // Número de delito
-  city: string; // LUGAR
-  date: string; // FECHA
-  time: string; // HORA
-  state: string; // ESTADO
-  digitizer: string; // DIGITADOR
-  idOffice: string; // Nro. OFICIO
-  infraction: string; // DELITO
-  unit: string; // UNIDAD
-  prosecution: string; // FISCALIA
-  subjects: Subject[];
-};
-
-type Subject = {
-  id: string; // Cédula
-  fullname: string; // NOMBRES COMPLETOS
-  state: SubjectState; // ESTADO
-};
-
-enum SubjectState {
-  COMPLAINANT = 'COMPLAINANT',
-  UNRECOGNIZED_SUSPECT = 'UNRECOGNIZED_SUSPECT',
-  SUSPECT = 'SUSPECT',
-  VICTIM = 'VICTIM'
-}
 
 export const searchAction = async (
   identification: string
@@ -112,10 +86,10 @@ const getComplaintsById = async (
       subjectsBody?.querySelectorAll('tr')?.forEach((s) => {
         const state = s.querySelectorAll('td')[2].textContent?.trim();
         const stateMap: Record<string, SubjectState> = {
-          DENUNCIANTE: SubjectState.COMPLAINANT,
-          'SOSPECHOSO NO RECONOCIDO': SubjectState.UNRECOGNIZED_SUSPECT,
-          SOSPECHOSO: SubjectState.SUSPECT,
-          VICTIMA: SubjectState.VICTIM
+          DENUNCIANTE: 'COMPLAINANT',
+          'SOSPECHOSO NO RECONOCIDO': 'UNRECOGNIZED_SUSPECT',
+          SOSPECHOSO: 'SUSPECT',
+          VICTIMA: 'VICTIM'
         };
 
         const subject: Subject = {
