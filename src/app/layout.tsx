@@ -58,7 +58,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
       >
         <NextUIProvider>
           <Navbar />
-          <main>{children}</main>
+          {children}
           <Toaster />
         </NextUIProvider>
       </body>
