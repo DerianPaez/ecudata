@@ -1,6 +1,6 @@
 'use server';
 
-import { Complaint, Subject, SubjectState } from '@/types/complaint';
+import { Complaint, Subject, SubjectState, Vehicle } from '@/types/complaint';
 import axios from 'axios';
 import puppeteer from 'puppeteer';
 
@@ -81,7 +81,9 @@ const getComplaintsById = async (
       const detailsHead = tables[0].querySelector('thead');
       const detailsBody = tables[0].querySelector('tbody');
       const subjectsBody = tables[1].querySelector('tbody');
+      const vehiclesBody = tables[2]?.querySelector('tbody');
       const subjects: Subject[] = [];
+      const vehicles: Vehicle[] = [];
 
       subjectsBody?.querySelectorAll('tr')?.forEach((s) => {
         const state = s.querySelectorAll('td')[2].textContent?.trim();
@@ -99,6 +101,16 @@ const getComplaintsById = async (
         };
 
         subjects.push(subject);
+      });
+
+      vehiclesBody?.querySelectorAll('tr')?.forEach((v) => {
+        const vehicle: Vehicle = {
+          brand: v.querySelectorAll('td')[0].textContent?.trim() || '',
+          model: v.querySelectorAll('td')[1].textContent?.trim() || '',
+          plate: v.querySelectorAll('td')[2].textContent?.trim() || ''
+        };
+
+        vehicles.push(vehicle);
       });
 
       const complaint: Complaint = {
@@ -153,7 +165,8 @@ const getComplaintsById = async (
             ?.querySelectorAll('tr')?.[4]
             ?.querySelectorAll('td')?.[2]
             ?.textContent?.trim() || '',
-        subjects
+        subjects,
+        vehicles
       };
 
       complaints.push(complaint);
