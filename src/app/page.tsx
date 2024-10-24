@@ -62,8 +62,7 @@ const Home: React.FC = () => {
         <div>
           <p>{fullName}</p>
         </div>
-      </section>
-      <section>
+
         <ComplaintBox complaintList={complaintList} />
       </section>
     </Fragment>
