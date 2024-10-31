@@ -42,7 +42,9 @@ export const ComplaintBox: React.FC<ComplaintBoxProps> = ({
                   unit={unit}
                 />
                 <ComplaintSubject subjectList={subjects} />
-                {vehicles && <ComplaintVehicle vehicleList={vehicles} />}
+                {vehicles && vehicles.length > 0 && (
+                  <ComplaintVehicle vehicleList={vehicles} />
+                )}
               </div>
             </AccordionItem>
           );
