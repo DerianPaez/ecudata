@@ -1,7 +1,6 @@
 import { ComplaintDetailProps } from './types';
 
 export const ComplaintDetail: React.FC<ComplaintDetailProps> = ({
-  date,
   time,
   digitizer,
   state,
@@ -11,9 +10,6 @@ export const ComplaintDetail: React.FC<ComplaintDetailProps> = ({
 }) => {
   return (
     <div className='grid gap-1'>
-      <p>
-        <b>Fecha:</b> {date}
-      </p>
       <p>
         <b>Hora:</b> {time}
       </p>
