@@ -1,13 +1,13 @@
 export type Complaint = ComplaintDetail & {
   id: string;
   city: string;
+  date: string;
   infraction: string;
   subjects: Subject[];
   vehicles?: Vehicle[];
 };
 
 export type ComplaintDetail = {
-  date: string;
   time: string;
   state: string;
   digitizer: string;

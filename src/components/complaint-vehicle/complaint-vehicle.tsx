@@ -12,8 +12,8 @@ export const ComplaintVehicle: React.FC<ComplaintVehicleProps> = ({
   vehicleList
 }) => {
   return (
-    <div className='grid gap-1'>
-      <h3 className='text-center text-lg uppercase'>Vehículos</h3>
+    <div className='grid gap-1 overflow-y-hidden'>
+      <h3 className='md:text-center text-lg uppercase'>Vehículos</h3>
       <Table removeWrapper aria-label='Example static collection table'>
         <TableHeader>
           <TableColumn>Marca</TableColumn>

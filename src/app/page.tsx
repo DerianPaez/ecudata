@@ -12,10 +12,12 @@ import { searchAction } from './actions/search-action';
 const Home: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [complaintList, setComplaintList] = useState<Complaint[]>([]);
+  const [identification, setIdentification] = useState('');
 
   const handleSearch = async (formData: FormData): Promise<void> => {
     try {
       const identification = formData.get('identification');
+      setIdentification(identification as string);
       if (!identification || typeof identification !== 'string') return;
       const data = await searchAction(identification);
       setFullName(data.fullName);
@@ -63,7 +65,12 @@ const Home: React.FC = () => {
           <p>{fullName}</p>
         </div>
 
-        <ComplaintBox complaintList={complaintList} />
+        {identification && (
+          <ComplaintBox
+            complaintList={complaintList}
+            identification={identification}
+          />
+        )}
       </section>
     </Fragment>
   );

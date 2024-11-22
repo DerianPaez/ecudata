@@ -1,4 +1,8 @@
-import { Subject } from '@/types/complaint';
+export type Subject = {
+  id: string;
+  fullname: string;
+  state: string;
+};
 
 export type ComplaintSubjectProps = {
   subjectList: Subject[];
