@@ -5,6 +5,7 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { revalidatePath } from 'next/cache';
 import puppeteer from 'puppeteer';
+import { downloadBrowsers } from 'puppeteer/internal/node/install.js';
 
 export type SearchActionResponse = {
   contribuyente: {
@@ -51,7 +52,15 @@ const getFullName = async (identification: string): Promise<string> => {
 const getComplaintsById = async (
   identification: string
 ): Promise<Complaint[]> => {
+  await downloadBrowsers();
+
   const browser = await puppeteer.launch({
+    args: [
+      '--use-gl=angle',
+      '--use-angle=swiftshader',
+      '--single-process',
+      '--no-sandbox'
+    ],
     headless: true
   });
 
