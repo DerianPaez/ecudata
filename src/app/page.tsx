@@ -20,9 +20,11 @@ const Home: React.FC = () => {
       setIdentification(identification as string);
       if (!identification || typeof identification !== 'string') return;
       const data = await searchAction(identification);
+      if (!data) return;
       setFullName(data.fullName);
       setComplaintList(data.complaints);
-    } catch {
+    } catch (error) {
+      console.log(error);
       toast.error(
         `Número de cedula incorrecto o error al buscar la información`
       );
