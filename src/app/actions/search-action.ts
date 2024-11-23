@@ -2,6 +2,7 @@
 
 import { Complaint, Subject, SubjectState, Vehicle } from '@/types/complaint';
 import axios from 'axios';
+import { revalidatePath } from 'next/cache';
 import puppeteer from 'puppeteer';
 
 export type SearchActionResponse = {
@@ -17,27 +18,31 @@ export type SearchActionResponseAdapted = {
 
 export const searchAction = async (
   identification: string
-): Promise<SearchActionResponseAdapted> => {
-  const response = await axios.get<SearchActionResponse>(
-    `https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion/${identification}`
-  );
+): Promise<SearchActionResponseAdapted | null> => {
+  try {
+    const response = await axios.get<SearchActionResponse>(
+      `https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion/${identification}`
+    );
 
-  const complaints = await getComplaintsById(identification);
+    const complaints = await getComplaintsById(identification);
 
-  const data = response.data;
+    const data = response.data;
 
-  return {
-    fullName: data.contribuyente.nombreComercial,
-    complaints
-  };
+    return {
+      fullName: data.contribuyente.nombreComercial,
+      complaints
+    };
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
 };
 
 const getComplaintsById = async (
   identification: string
 ): Promise<Complaint[]> => {
   const browser = await puppeteer.launch({
-    headless: true,
-    slowMo: 50
+    headless: 'shell'
   });
 
   const page = await browser.newPage();
@@ -176,6 +181,7 @@ const getComplaintsById = async (
   });
 
   await browser.close();
+  revalidatePath('/');
 
   return data;
 };
