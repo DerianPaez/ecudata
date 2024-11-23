@@ -2,6 +2,7 @@
 
 import { Complaint, Subject, SubjectState, Vehicle } from '@/types/complaint';
 import axios from 'axios';
+import * as cheerio from 'cheerio';
 import { revalidatePath } from 'next/cache';
 import puppeteer from 'puppeteer';
 
@@ -18,24 +19,33 @@ export type SearchActionResponseAdapted = {
 
 export const searchAction = async (
   identification: string
-): Promise<SearchActionResponseAdapted | null> => {
-  try {
-    const response = await axios.get<SearchActionResponse>(
-      `https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion/${identification}`
-    );
+): Promise<SearchActionResponseAdapted> => {
+  const fullName = await getFullName(identification);
+  const complaints = await getComplaintsById(identification);
 
-    const complaints = await getComplaintsById(identification);
+  return {
+    fullName,
+    complaints
+  };
+};
 
-    const data = response.data;
+const getFullName = async (identification: string): Promise<string> => {
+  const encodedParams = new URLSearchParams();
+  encodedParams.set('name', identification);
+  encodedParams.set('tipo', 'I');
 
-    return {
-      fullName: data.contribuyente.nombreComercial,
-      complaints
-    };
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+  const options = {
+    method: 'POST',
+    url: 'https://www.ecuadorlegalonline.com/modulo/consultar-cedula.php',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    data: encodedParams
+  };
+
+  const { data } = await axios.request(options);
+  const $ = cheerio.load(data);
+
+  const fullName = $('#name0 a strong').text();
+  return fullName;
 };
 
 const getComplaintsById = async (
