@@ -52,7 +52,7 @@ const getComplaintsById = async (
   identification: string
 ): Promise<Complaint[]> => {
   const browser = await puppeteer.launch({
-    headless: 'shell'
+    headless: true
   });
 
   const page = await browser.newPage();
