@@ -32,4 +32,5 @@ export type SubjectState =
   | 'COMPLAINANT'
   | 'UNRECOGNIZED_SUSPECT'
   | 'SUSPECT'
-  | 'VICTIM';
+  | 'VICTIM'
+  | 'UNKNOWN';
