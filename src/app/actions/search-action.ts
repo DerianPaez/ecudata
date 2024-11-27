@@ -3,9 +3,7 @@
 import { Complaint, Subject, SubjectState, Vehicle } from '@/types/complaint';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { revalidatePath } from 'next/cache';
-import puppeteer from 'puppeteer';
-import { downloadBrowsers } from 'puppeteer/internal/node/install.js';
+import https from 'https';
 
 export type SearchActionResponse = {
   contribuyente: {
@@ -46,71 +44,57 @@ const getFullName = async (identification: string): Promise<string> => {
   const $ = cheerio.load(data);
 
   const fullName = $('#name0 a strong').text();
-  return fullName;
+  return fullName.replaceAll('�', 'Ñ').toUpperCase();
 };
 
 const getComplaintsById = async (
   identification: string
 ): Promise<Complaint[]> => {
-  await downloadBrowsers();
-
-  const browser = await puppeteer.launch({
-    args: [
-      '--use-gl=angle',
-      '--use-angle=swiftshader',
-      '--single-process',
-      '--no-sandbox'
-    ],
-    headless: true
-  });
-
-  const page = await browser.newPage();
-
-  await page.setUserAgent(
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-  );
-  await page.goto(
-    'https://www.gestiondefiscalias.gob.ec/siaf/informacion/web/noticiasdelito/index.php'
-  );
-
-  await page.waitForSelector('#pwd');
-
-  await page.type('#pwd', identification);
-
-  await page.click('#btn_buscar_denuncia');
-
-  await page.waitForSelector('#resultados', { visible: true });
-
-  const data = await page.evaluate(() => {
-    const complaints: Complaint[] = [];
-    const crimesElements: Element[] = [];
-    const results = document.querySelector('#resultados');
-
-    if (results) {
-      const generals = results.querySelectorAll('.general');
-
-      generals.forEach((el) => {
-        const subGeneral = el.querySelector('.general');
-
-        if (subGeneral) {
-          el.removeChild(subGeneral);
-        }
-
-        crimesElements.push(el);
-      });
+  const response = await axios.get(
+    'https://www.gestiondefiscalias.gob.ec/siaf/comunes/noticiasdelito/info_mod.php',
+    {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+      },
+      params: {
+        businfo: `a:1:{i:0;s:10:"${identification}";}`
+      },
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false
+      })
     }
+  );
 
-    crimesElements.forEach((c) => {
-      const tables = c.querySelectorAll('table');
-      const detailsHead = tables[0].querySelector('thead');
-      const detailsBody = tables[0].querySelector('tbody');
-      const subjectsBody = tables[1].querySelector('tbody');
-      const vehiclesBody = tables[2]?.querySelector('tbody');
+  const $ = cheerio.load(response.data);
+
+  const complaints: Complaint[] = [];
+  const results = $('.general');
+
+  if (results.length) {
+    const generals = $('.general');
+
+    generals.each((_, el) => {
+      const $c = $(el);
+      const subGeneral = $c.find('.general');
+
+      if (subGeneral.length) {
+        subGeneral.remove();
+      }
+
+      const tables = $c.find('table');
+
+      const detailsHead = tables.eq(0).find('thead');
+      const detailsBody = tables.eq(0).find('tbody');
+      const subjectsBody = tables.eq(1).find('tbody');
+      const vehiclesBody = tables.eq(2)?.find('tbody');
       const subjects: Subject[] = [];
       const vehicles: Vehicle[] = [];
 
-      subjectsBody?.querySelectorAll('tr')?.forEach((s) => {
-        const state = s.querySelectorAll('td')[2].textContent?.trim();
+      subjectsBody.find('tr').each((_, s) => {
+        const $s = $(s);
+        const tds = $s.find('td');
+        const state = tds.eq(2).text().trim();
         const stateMap: Record<string, SubjectState> = {
           DENUNCIANTE: 'COMPLAINANT',
           'SOSPECHOSO NO RECONOCIDO': 'UNRECOGNIZED_SUSPECT',
@@ -119,19 +103,22 @@ const getComplaintsById = async (
         };
 
         const subject: Subject = {
-          id: s.querySelectorAll('td')[0].textContent?.trim() || '',
-          fullname: s.querySelectorAll('td')[1].textContent?.trim() || '',
-          state: stateMap[state || '']
+          id: tds.eq(0).text().trim() || '',
+          fullname: tds.eq(1).text().trim() || '',
+          state: stateMap[state || ''] || 'UNKNOWN'
         };
 
         subjects.push(subject);
       });
 
-      vehiclesBody?.querySelectorAll('tr')?.forEach((v) => {
+      vehiclesBody?.find('tr').each((_, v) => {
+        const $v = $(v);
+        const tds = $v.find('td');
+
         const vehicle: Vehicle = {
-          brand: v.querySelectorAll('td')[0].textContent?.trim() || '',
-          model: v.querySelectorAll('td')[1].textContent?.trim() || '',
-          plate: v.querySelectorAll('td')[2].textContent?.trim() || ''
+          brand: tds.eq(0).text().trim() || '',
+          model: tds.eq(1).text().trim() || '',
+          plate: tds.eq(2).text().trim() || ''
         };
 
         vehicles.push(vehicle);
@@ -140,67 +127,31 @@ const getComplaintsById = async (
       const complaint: Complaint = {
         id:
           detailsHead
-            ?.querySelector('tr')
-            ?.querySelector('th')
-            ?.textContent?.trim()
-            ?.replace('NOTICIA DEL DELITO Nro. ', '') || '',
-        city:
-          detailsBody
-            ?.querySelectorAll('tr')?.[0]
-            ?.querySelectorAll('td')?.[2]
-            ?.textContent?.trim() || '',
-        date:
-          detailsBody
-            ?.querySelectorAll('tr')?.[0]
-            ?.querySelectorAll('td')?.[4]
-            ?.textContent?.trim() || '',
-        time:
-          detailsBody
-            ?.querySelectorAll('tr')?.[1]
-            ?.querySelectorAll('td')?.[1]
-            ?.textContent?.trim() || '',
+            .find('tr')
+            .find('th')
+            .text()
+            .trim()
+            .replace('NOTICIA DEL DELITO Nro. ', '') || '',
+        city: detailsBody.find('tr').eq(0).find('td').eq(2).text().trim() || '',
+        date: detailsBody.find('tr').eq(0).find('td').eq(4).text().trim() || '',
+        time: detailsBody.find('tr').eq(1).find('td').eq(1).text().trim() || '',
         digitizer:
-          detailsBody
-            ?.querySelectorAll('tr')?.[1]
-            ?.querySelectorAll('td')?.[3]
-            ?.textContent?.trim() || '',
+          detailsBody.find('tr').eq(1).find('td').eq(3).text().trim() || '',
         state:
-          detailsBody
-            ?.querySelectorAll('tr')?.[2]
-            ?.querySelectorAll('td')?.[1]
-            ?.textContent?.trim() || '',
+          detailsBody.find('tr').eq(2).find('td').eq(1).text().trim() || '',
         idOffice:
-          detailsBody
-            ?.querySelectorAll('tr')?.[2]
-            ?.querySelectorAll('td')?.[3]
-            ?.textContent?.trim() || '',
+          detailsBody.find('tr').eq(2).find('td').eq(3).text().trim() || '',
         infraction:
-          detailsBody
-            ?.querySelectorAll('tr')?.[3]
-            ?.querySelectorAll('td')?.[1]
-            ?.textContent?.trim() || '',
-        unit:
-          detailsBody
-            ?.querySelectorAll('tr')?.[4]
-            ?.querySelectorAll('td')?.[1]
-            ?.textContent?.trim() || '',
+          detailsBody.find('tr').eq(3).find('td').eq(1).text().trim() || '',
+        unit: detailsBody.find('tr').eq(4).find('td').eq(1).text().trim() || '',
         prosecution:
-          detailsBody
-            ?.querySelectorAll('tr')?.[4]
-            ?.querySelectorAll('td')?.[2]
-            ?.textContent?.trim() || '',
+          detailsBody.find('tr').eq(4).find('td').eq(2).text().trim() || '',
         subjects,
         vehicles
       };
 
       complaints.push(complaint);
     });
-
-    return complaints;
-  });
-
-  await browser.close();
-  revalidatePath('/');
-
-  return data;
+  }
+  return complaints;
 };

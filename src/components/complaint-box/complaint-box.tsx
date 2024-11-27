@@ -39,7 +39,7 @@ export const ComplaintBox: React.FC<ComplaintBoxProps> = ({
                 ['VICTIM']: 'secondary'
               };
 
-              const labelByState = {
+              const labelByStateMap = {
                 ['COMPLAINANT']: 'Denunciante',
                 ['UNRECOGNIZED_SUSPECT']: 'Sospechoso no reconocido',
                 ['SUSPECT']: 'Sospechoso',
@@ -49,6 +49,11 @@ export const ComplaintBox: React.FC<ComplaintBoxProps> = ({
               const subjectState = subjects.find(
                 (subject) => subject.id === identification
               )?.state;
+
+              const labelByState =
+                subjectState !== 'UNKNOWN' && subjectState
+                  ? labelByStateMap[subjectState]
+                  : '';
 
               return (
                 <AccordionItem
@@ -64,7 +69,7 @@ export const ComplaintBox: React.FC<ComplaintBoxProps> = ({
                           color={colorsByState[subjectState]}
                           variant='flat'
                         >
-                          {labelByState[subjectState]}
+                          {labelByState}
                         </Chip>
                       )}
                     </div>
@@ -84,7 +89,7 @@ export const ComplaintBox: React.FC<ComplaintBoxProps> = ({
                       subjectList={subjects.map((s) => ({
                         id: s.id,
                         fullname: s.fullname,
-                        state: labelByState[s.state]
+                        state: labelByState
                       }))}
                     />
                     {vehicles && vehicles.length > 0 && (
